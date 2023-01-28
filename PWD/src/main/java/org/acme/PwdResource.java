@@ -12,7 +12,8 @@ public class PwdResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String login(final String name,final String pwd) {
+    @Path("/{name}/{pwd}")
+    public String login(@PathParam("name")final String name,@PathParam("pwd")final String pwd) {
         return service.login(name, pwd);
     }
 

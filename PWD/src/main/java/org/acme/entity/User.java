@@ -3,11 +3,11 @@ package org.acme.entity;
 import lombok.Getter;
 import lombok.Setter;
 import org.acme.exceptions.UserFormatException;
+import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.regex.Pattern;
 
 @Getter
@@ -24,15 +24,12 @@ public class User {
     @Id
     int id;
 
+    @Email
     String userName;
+
+    @Column(length = 2040)
+    @Length(min = 30,max = 2040)
+    @NotNull
     String pwd;
     String phoneNumber;
-
-    public void check() throws UserFormatException {
-        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        Pattern pattern = Pattern.compile(regex);
-
-        if(!pattern.matcher(userName).matches())
-            throw new UserFormatException("Invalid E-Mail");
-    }
 }

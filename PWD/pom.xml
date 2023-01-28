@@ -98,6 +98,10 @@
       <artifactId>guava</artifactId>
       <version>31.0.1-jre</version>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hibernate-validator</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
