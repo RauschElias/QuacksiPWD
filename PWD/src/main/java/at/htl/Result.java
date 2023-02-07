@@ -1,4 +1,4 @@
-package org.acme;
+package at.htl;
 
 import javax.validation.ConstraintViolation;
 import java.util.Set;
