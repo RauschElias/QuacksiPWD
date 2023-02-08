@@ -2,6 +2,7 @@ package at.htl;
 
 import com.google.common.hash.Hashing;
 import at.htl.entity.WebUser;
+import lombok.Getter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ public class PwdService {
 
     // in memory list for password changes
     // as this simple structure doesn't require persisted password change tokens
+    @Getter
     List<PasswordChange> passwordChanges = new LinkedList<>();
 
     public static final String saltAdditive = "_this_is_my_secure_salt_additive_no_one_is_ever_gonna_find_it_23p07640973609764=/&$=/&=/)$&";
@@ -27,11 +29,6 @@ public class PwdService {
     @Inject
     Validator validator;
 
-
-    public boolean checkIfPasswordIsValid(WebUser user) {
-        WebUser u = manager.createNamedQuery("getUserByName", WebUser.class).setParameter(1,user.getUserName()).getSingleResult();
-        return hashPwd(user).equals(u.getPwd());
-    }
 
     private String hashPwd(WebUser user) {
         return getHash(user.getPwSalt() + saltAdditive + user.getPwd());
@@ -63,12 +60,14 @@ public class PwdService {
             return e.getMessage();
         }
 
+        System.out.println("created with pw: " + newUser.getPwd());
         return newUser.getUserName() + " created";
     }
 
     public String requestPasswordChange(String username) {
         PasswordChange ch = new PasswordChange();
         List<WebUser> u =manager.createNamedQuery("getUserByName", WebUser.class).setParameter(1,username).getResultList();
+        System.out.println(u);
         ch.user = u.get(0);
         ch.validUntil = LocalDateTime.now().plusMinutes(15);
         Random rnd = new Random();
@@ -76,6 +75,7 @@ public class PwdService {
         rnd.nextBytes(rndBytes);
         String token = new String(Base64.getEncoder().encode(rndBytes));
         ch.token = token;
+        System.out.println("pwchange " + ch);
         passwordChanges.add(ch);
         return token;
     }
@@ -93,24 +93,32 @@ public class PwdService {
     }
 
     public boolean userExists(String username) {
-        List<WebUser> u =manager.createNamedQuery("getUserByName", WebUser.class).setParameter(1,username).getResultList();
-        return u.size() == 1;
+        List<WebUser> u =manager.createNamedQuery("getUserByName").setParameter("name",username).getResultList();
+        System.out.println(u.size());
+        return u.size() >= 1;
     }
 
     public String login(String name, String password) {
-        WebUser user = new WebUser();
+        List<WebUser> queryResult = manager.createNamedQuery("getUserByName").setParameter("name",name).getResultList();
+
+        if (queryResult.isEmpty())
+            return "User does not exist";
+
+        WebUser user = queryResult.get(0);
+        String correctPassword = user.getPwd();
         user.setUserName(name);
+        user.setPwd(password);
         user.setPwd(hashPwd(user));
 
         Result validationResult = validate(user);
-        String errors = validationResult.getMessage();
+        String errors = "";
+        errors += validationResult.getMessage();
+
+        System.out.println("pwd: " + user.getPwd() + "   correctPWD: " + correctPassword);
 
         if (errors.isEmpty())
             return errors;
-        else if (!userExists(name)){
-            return "User does not exist";
-        }
-        else if(!checkIfPasswordIsValid(user)){
+        else if(!user.getPwd().equals(correctPassword)){
             return "Password is wrong";
         }
 

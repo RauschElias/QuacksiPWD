@@ -13,8 +13,8 @@ import javax.validation.constraints.NotNull;
 @Setter
 
 @NamedQueries({
-    @NamedQuery(name = "getUserByName" ,query="select u from WebUser u where u.userName = ?1"),
-    @NamedQuery(name = "updatePwd" ,query="update WebUser u set u.pwd = ?1 where u.userName = ?2")
+    @NamedQuery(name = "getUserByName" ,query="select u from WebUser u where u.userName = :name"),
+    @NamedQuery(name = "updatePwd" ,query="update WebUser u set u.pwd = ?1 where u.userName = ?2"),
 })
 
 @Entity

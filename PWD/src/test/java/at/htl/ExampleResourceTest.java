@@ -1,24 +1,19 @@
 package at.htl;
 
 import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.wildfly.common.Assert;
+
+import javax.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
 
 @QuarkusTest
 public class ExampleResourceTest {
-
-    @Test
-    public void testHelloEndpoint() {
-        given()
-                .body("{\"username\":\"robert\", \"pwd\":\"test\", \"pwdRepeat\":\"test\", \"email\":\"robert@test.at\"}")
-                .header("content-type", "application/json").when()
-                .post("/service/register")
-                .then()
-                .statusCode(200)
-                .body(is("robert created"));
-    }
+    @Inject
+    PwdService service;
 
     @Test
     public void testLogin() {
@@ -68,25 +63,52 @@ public class ExampleResourceTest {
     }
 
     @Test
-    public void testRequestChangePWD() {
+    public void testChangePWD() {
+
         given()
-                .body("{\"username\":\"robert\", \"pwd\":\"test\", \"pwdRepeat\":\"test\", \"email\":\"robert@test.at\"}")
+                .body("{\"username\":\"robert2\", \"pwd\":\"test\", \"pwdRepeat\":\"test\", \"email\":\"robert@test.at\"}")
                 .header("content-type", "application/json").when()
                 .post("/service/register")
                 .then()
                 .statusCode(200)
-                .body(is("robert created"));
+                .body(is("robert2 created"));
+
+        given()
+                .body("{\"username\":\"robert3\"}")
+                .header("content-type", "application/json").when()
+                .get("/service/reset")
+                .then()
+                .statusCode(200)
+                .body(is("Username existiert nicht"));
+
+        given()
+                .body("{\"username\":\"robert2\"}")
+                .header("content-type", "application/json").when()
+                .get("/service/reset")
+                .then()
+                .statusCode(200)
+                .body(is("Ihnen wurde eine Email gesendet"));
+
+        given()
+                .body("{\"token\":\"ssds\",\"pw\":\"t\"}")
+                .header("content-type", "application/json").when()
+                .patch("/service/reset/")
+                .then()
+                .statusCode(200)
+                .body(is("Unknown token"));
+
+        given()
+                .body("{\"pw\":t}")
+                .header("content-type", "application/json").when()
+                .patch("/service/reset/" + service.getPasswordChanges().get(0))
+                .then()
+                .statusCode(200)
+                .body(is("Password wurde geändert"));
     }
 
     @Test
-    public void testChangePWD() {
-        given()
-                .body("{\"username\":\"robert\", \"pwd\":\"test\", \"pwdRepeat\":\"test\", \"email\":\"robert@test.at\"}")
-                .header("content-type", "application/json").when()
-                .post("/service/register")
-                .then()
-                .statusCode(200)
-                .body(is("robert created"));
+    public void hurensohn(){
+        Assertions.assertTrue(service.userExists("robert2"));
     }
-
 }
+

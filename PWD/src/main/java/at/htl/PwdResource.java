@@ -1,5 +1,6 @@
 package at.htl;
 
+import at.htl.dtos.ChangePwdParams;
 import at.htl.dtos.RequestUser;
 
 import javax.inject.Inject;
@@ -33,8 +34,8 @@ public class PwdResource {
     @Path("/reset")
     @Produces(MediaType.TEXT_PLAIN)
     public String requestChangePWD(String username){
-        if(service.userExists(username)){
-            return "Username exixtiert nicht";
+        if(!service.userExists(username)){
+            return "Username existiert nicht";
         }
 
         String token = service.requestPasswordChange(username);
@@ -43,11 +44,10 @@ public class PwdResource {
     }
 
     @PATCH
-    @Path("/reset/{token}")
+    @Path("/reset")
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String changePWD(@PathParam("token") String token, String pw){
-        if (service.changePwd(token, pw)) {
+    public String changePWD(ChangePwdParams params){
+        if (service.changePwd(params.getToken(), params.getPwd())) {
             return "Password wurde geändert";
         }
         return "Unknown token";
