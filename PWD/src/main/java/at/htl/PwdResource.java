@@ -34,13 +34,12 @@ public class PwdResource {
     @Path("/reset")
     @Produces(MediaType.TEXT_PLAIN)
     public String requestChangePWD(String username){
-        if(!service.userExists(username)){
-            return "Username existiert nicht";
-        }
+        if (!service.userExists(username))
+            return "User does not exist";
 
         String token = service.requestPasswordChange(username);
-        System.out.println("Email an " + service.getUser(username).getEmail() + "\nYour password reset token is: " + token);
-        return "Ihnen wurde eine Email gesendet";
+        System.out.println("Email to " + service.getUser(username).getEmail() + "\nYour password reset token is: " + token);
+        return "We sent you an email";
     }
 
     @PATCH
@@ -48,7 +47,7 @@ public class PwdResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String changePWD(ChangePwdParams params){
         if (service.changePwd(params.getToken(), params.getPwd())) {
-            return "Password wurde geändert";
+            return "Password changed";
         }
         return "Unknown token";
     }

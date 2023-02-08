@@ -35,7 +35,7 @@ public class PwdService {
     }
 
     public WebUser getUser(String name) {
-        List<WebUser> u = manager.createNamedQuery("getUserByName", WebUser.class).setParameter(1,name).getResultList();
+        List<WebUser> u = manager.createNamedQuery("getUserByName", WebUser.class).setParameter("name",name).getResultList();
         return u.get(0);
     }
 
@@ -66,7 +66,7 @@ public class PwdService {
 
     public String requestPasswordChange(String username) {
         PasswordChange ch = new PasswordChange();
-        List<WebUser> u =manager.createNamedQuery("getUserByName", WebUser.class).setParameter(1,username).getResultList();
+        List<WebUser> u =manager.createNamedQuery("getUserByName", WebUser.class).setParameter("name",username).getResultList();
         System.out.println(u);
         ch.user = u.get(0);
         ch.validUntil = LocalDateTime.now().plusMinutes(15);
@@ -93,13 +93,13 @@ public class PwdService {
     }
 
     public boolean userExists(String username) {
-        List<WebUser> u =manager.createNamedQuery("getUserByName").setParameter("name",username).getResultList();
+        List<WebUser> u =manager.createNamedQuery("getUserByName",WebUser.class).setParameter("name",username).getResultList();
         System.out.println(u.size());
         return u.size() >= 1;
     }
 
     public String login(String name, String password) {
-        List<WebUser> queryResult = manager.createNamedQuery("getUserByName").setParameter("name",name).getResultList();
+        List<WebUser> queryResult = manager.createNamedQuery("getUserByName",WebUser.class).setParameter("name",name).getResultList();
 
         if (queryResult.isEmpty())
             return "User does not exist";
