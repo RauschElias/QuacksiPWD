@@ -11,6 +11,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -23,7 +24,9 @@ public class PwdService {
     @Getter
     List<PasswordChange> passwordChanges = new LinkedList<>();
 
-    public static final String saltAdditive = "_this_is_my_secure_salt_additive_no_one_is_ever_gonna_find_it_23p07640973609764=/&$=/&=/)$&";
+    // it is going to take 20 trillion trillion trillion trillion trillion trillion trillion years to crack this
+    // source: https://www.passwordmonster.com/
+    public static final String saltAdditive = "_this_is_my_secure_salt_additive_no_one_is_EVER_gonna_find_it_23p07640973609764=/&$=/&=/)$&";
 
     @Inject
     EntityManager manager;
@@ -47,7 +50,7 @@ public class PwdService {
     public String addNewUser(String username, String pwd, String email) {
         WebUser newUser = new WebUser();
         newUser.setUserName(username);
-        Random rnd = new Random();
+        SecureRandom rnd = new SecureRandom();
         byte[] rndBytes = new byte[16];
         rnd.nextBytes(rndBytes);
         newUser.setPwSalt(new String(Base64.getEncoder().encode(rndBytes)));
@@ -55,12 +58,19 @@ public class PwdService {
         newUser.setPwd(hashPwd(newUser));
         newUser.setEmail(email);
 
+        Result validationResult = validate(newUser);
+        String errors = "";
+        errors += validationResult.getMessage();
+        if (!errors.isEmpty()) {
+            return errors;
+        }
         try {
             manager.persist(newUser);
         } catch (ConstraintViolationException e){
             return e.getMessage();
         }
 
+        // debug
         System.out.println("created with pw: " + newUser.getPwd());
         return newUser.getUserName() + " created";
     }
@@ -118,6 +128,7 @@ public class PwdService {
         String errors = "";
         errors += validationResult.getMessage();
 
+        // debug
         System.out.println("pwd: " + user.getPwd() + "   correctPWD: " + correctPassword);
 
         if (errors.isEmpty())
