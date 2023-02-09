@@ -12,6 +12,7 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @ApplicationScoped
@@ -40,7 +41,7 @@ public class PwdService {
     }
 
     private String  getHash(String hash) {
-        return Hashing.sha256().hashString(hash,StandardCharsets.UTF_8).toString();
+        return Hashing.sha512().hashString(hash,StandardCharsets.UTF_8).toString();
     }
 
     public String addNewUser(String username, String pwd, String email) {
@@ -83,11 +84,13 @@ public class PwdService {
 
     public boolean changePwd(String token, String pw) {
         for (PasswordChange ch: passwordChanges) {
-            if (ch.token.equals(token)) {
-                ch.user.setPwd(pw);
-                ch.user.setPwd(hashPwd(ch.user));
-                manager.persist(ch.user);
-                return true;
+            if (ch.token.equals(token)
+                    && ch.validUntil.toEpochSecond(ZoneOffset.UTC)
+                    >= LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) {
+                        ch.user.setPwd(pw);
+                        ch.user.setPwd(hashPwd(ch.user));
+                        manager.persist(ch.user);
+                        return true;
             }
         }
         return false;

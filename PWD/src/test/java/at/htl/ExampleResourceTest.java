@@ -61,5 +61,16 @@ public class ExampleResourceTest {
                 .statusCode(200)
                 .body(is("robert created"));
     }
+
+    @Test
+    public void testRegisterWrongRepeatPw() {
+        given()
+                .body("{\"username\":\"robert\", \"pwd\":\"test\", \"pwdRepeat\":\"testlidhdadpoa\", \"email\":\"robert@test.at\"}")
+                .header("content-type", "application/json").when()
+                .post("/service/register")
+                .then()
+                .statusCode(200)
+                .body(is("Wrong repeated password"));
+    }
 }
 

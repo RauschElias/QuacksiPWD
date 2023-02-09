@@ -27,6 +27,8 @@ public class PwdResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Transactional
     public String addNewUser(RequestUser user){
+        if (!user.getPwd().equals(user.getPwdRepeat()))
+            return "Wrong repeated password";
         return service.addNewUser(user.getUsername(),user.getPwd(),user.getEmail());
     }
 
