@@ -75,6 +75,7 @@ public class PwdService {
         rnd.nextBytes(rndBytes);
         String token = new String(Base64.getEncoder().encode(rndBytes));
         ch.token = token;
+        ch.validUntil = LocalDateTime.now().plusMinutes(5);
         System.out.println("pwchange " + ch);
         passwordChanges.add(ch);
         return token;
