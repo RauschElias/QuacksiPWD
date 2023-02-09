@@ -1,5 +1,6 @@
 package at.htl;
 
+import at.htl.dtos.PasswordChange;
 import com.google.common.hash.Hashing;
 import at.htl.entity.WebUser;
 import lombok.Getter;
@@ -80,7 +81,6 @@ public class PwdService {
         List<WebUser> u =manager.createNamedQuery("getUserByName", WebUser.class).setParameter("name",username).getResultList();
         System.out.println(u);
         ch.user = u.get(0);
-        ch.validUntil = LocalDateTime.now().plusMinutes(15);
         Random rnd = new Random();
         byte[] rndBytes = new byte[16];
         rnd.nextBytes(rndBytes);

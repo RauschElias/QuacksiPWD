@@ -1,4 +1,4 @@
-package at.htl;
+package at.htl.dtos;
 
 import at.htl.entity.WebUser;
 

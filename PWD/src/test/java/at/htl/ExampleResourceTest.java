@@ -48,7 +48,6 @@ public class ExampleResourceTest {
                 .then()
                 .statusCode(200)
                 .body(is("User does not exist"));
-
     }
 
     @Test
